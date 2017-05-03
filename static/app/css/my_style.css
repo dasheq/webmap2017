@@ -1,18 +1,16 @@
 .app-header {
     background-color: #b8e39c;
-    color: #286ac0;
+    color: #686b70;
     font-family: sans-serif, Verdana, Arial;
     font-weight: bold;
-    font-style: italic;
     font-size: larger;
 }
 
 .app-header-small {
     background-color: #b8e39c;
-    color: #286ac0;
+    color: #686b70;
     font-family: sans-serif, Verdana, Arial;
     font-weight: normal;
-    font-style: italic;
 }
 
 a {

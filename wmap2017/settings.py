@@ -87,11 +87,9 @@ WSGI_APPLICATION = 'wmap2017.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': '***************',
-        'USER': '***************',
-        'PASSWORD': '****************',
-        'HOST': '************************',
-        'PORT': '5432',
+        'NAME': 'webmapping',
+        'USER': 'damo',
+        'HOST': 'localhost',
     }
 }
 

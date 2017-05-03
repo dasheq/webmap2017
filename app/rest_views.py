@@ -16,6 +16,12 @@ from rest_framework.authtoken.models import Token
 # from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.forms import ValidationError
+import urllib as urllib2
+
+
+
+from . import forms
 
 
 class UsersList(generics.ListAPIView):
@@ -113,3 +119,45 @@ def token_login(request):
             return Response({"detail": "Inactive account"}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({"detail": "Invalid User Id of Password"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET", ])
+@permission_classes((permissions.AllowAny,))
+@csrf_exempt
+def register(request):
+    print("first bp hit")
+    if (not request.GET["username"]) or (not request.GET["password"] or (not request.GET["email"])):
+        return Response({"detail": "Missing username and/or password and/or email"}, status=status.HTTP_400_BAD_REQUEST)
+        print("no values")
+    try:
+        user = get_user_model().objects.get(username=request.GET["username"])
+        if user:
+            print("user already exists")
+            return Response({"detail": "User already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    except get_user_model().DoesNotExist:
+        user = get_user_model().objects.create_user(username=request.GET["username"])
+
+        # Set user fields provided
+        print(request.GET["password"] + request.GET["firstname"] + request.GET["lastname"] + request.GET["email"])
+        user.set_password(request.GET["password"])
+        user.first_name = request.GET["firstname"]
+        user.last_name = request.GET["lastname"]
+        user.email = request.GET["email"]
+        user.save()
+        print("done")
+
+        return Response({"detail": "Successfully created"}, status=status.HTTP_201_CREATED)
+
+
+
+
+@api_view(["GET", ])
+@permission_classes((permissions.AllowAny,))
+@csrf_exempt
+def show_garda(request):
+    file = urllib2.urlopen(
+        'https://data.dublinked.ie/dataset/b1a0ce0a-bfd4-4d0b-b787-69a519c61672/resource/b38c4d25-097b-4a8f-b9be-cf6ab5b3e704/download/walk-dublin-poi-details-sample-datap20130415-1449.json')
+    data = file.read()
+    file.close()
+
+    return Response({"data": data}, status=status.HTTP_200_OK)
+
