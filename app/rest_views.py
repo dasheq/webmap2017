@@ -1,9 +1,11 @@
 from . import models
+
 from . import serializers
 from rest_framework import permissions
 from . import permissions as my_permissions
 from wmap2017 import settings
-
+from django.contrib.gis.db import models
+from models import FriendGroup
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework import permissions, authentication, status, generics
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -18,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.forms import ValidationError
 import urllib as urllib2
+
 
 
 
@@ -168,7 +171,48 @@ def show_locations(request):
 @permission_classes((permissions.AllowAny,))
 @csrf_exempt
 def show_groups(request):
-	user = get_user_model().objects.get(username=request.GET['username'])
-	groups = FriendGroup.objects.filter(owner=user).values('name')
+    user = get_user_model().objects.get(username=request.GET["owner"])
+    groups = FriendGroup.objects.filter(owner=user).values('name')
 
-	return Response({"groups": groups},status=status.HTTP_200_OK)
+    print(groups)
+    return Response({"data": groups},status=status.HTTP_200_OK)
+
+@api_view(["GET", ])
+@permission_classes((permissions.AllowAny,))
+@csrf_exempt
+def create_group(request):
+    groupname = request.GET["name"]
+    groupowner = request.GET["owner"]
+
+    if (not groupname) or (not groupowner):
+        return Response({"detail": "Missing groupname"}, status=status.HTTP_400_BAD_REQUEST)
+        print("no values")
+
+    group = models.FriendGroup()
+    group.name = groupname
+    group.owner = groupowner
+    group.save()
+
+    return Response({"detail": "Successfully created"}, status=status.HTTP_201_CREATED)
+
+@api_view(["GET", ])
+@permission_classes((permissions.AllowAny,))
+@csrf_exempt
+def show_friends(request):
+    username = request.GET['username']
+    groupname = request.GET['groupname']
+
+    group = FriendGroup.objects.get(owner=username, name=groupname)
+
+    friends = list(UserFriendGroup.objects.filter(friend_group=group).values("member_id"))
+
+    friendList = []
+    for member in friends:
+        user = get_user_model().objects.get(id=member["member_id"]).get_username()
+        friendList.append(user)
+
+    friendList = list(friendList)
+    list = [s.encode('utf-8') for s in friendList]
+
+    return Response({"friendList": list}, status=status.HTTP_200_OK)
+

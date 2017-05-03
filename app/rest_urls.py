@@ -13,5 +13,7 @@ urlpatterns = [
     url(r'^updateposition/$', rest_views.UpdatePosition.as_view(), name='update-position'),
     url(r'^signup/$', rest_views.register, name='signup'),
     url(r'^show_locations/$', rest_views.show_locations, name='show_locations'),
-    url(r'^show_groups/$', rest_views.show_groups, name='show_groups')
+    url(r'^show_groups/$', rest_views.show_groups, name='show_groups'),
+    url(r'^create_group/$', rest_views.create_group, name='create_group'),
+    url(r'^show_friends/$', rest_views.show_friends, name='show_friends')
 ]
