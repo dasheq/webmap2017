@@ -124,6 +124,8 @@ def token_login(request):
 @permission_classes((permissions.AllowAny,))
 @csrf_exempt
 def register(request):
+    print (request.GET)
+
     print("first bp hit")
     if (not request.GET["username"]) or (not request.GET["password"] or (not request.GET["email"])):
         return Response({"detail": "Missing username and/or password and/or email"}, status=status.HTTP_400_BAD_REQUEST)
@@ -153,7 +155,7 @@ def register(request):
 @api_view(["GET", ])
 @permission_classes((permissions.AllowAny,))
 @csrf_exempt
-def show_garda(request):
+def show_locations(request):
     file = urllib2.urlopen(
         'https://data.dublinked.ie/dataset/b1a0ce0a-bfd4-4d0b-b787-69a519c61672/resource/b38c4d25-097b-4a8f-b9be-cf6ab5b3e704/download/walk-dublin-poi-details-sample-datap20130415-1449.json')
     data = file.read()
@@ -161,3 +163,12 @@ def show_garda(request):
 
     return Response({"data": data}, status=status.HTTP_200_OK)
 
+
+@api_view(["GET", ])
+@permission_classes((permissions.AllowAny,))
+@csrf_exempt
+def show_groups(request):
+	user = get_user_model().objects.get(username=request.GET['username'])
+	groups = FriendGroup.objects.filter(owner=user).values('name')
+
+	return Response({"groups": groups},status=status.HTTP_200_OK)
